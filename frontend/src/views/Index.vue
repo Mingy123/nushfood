@@ -1,52 +1,22 @@
 <template>
-  <div id="app" class="relative">
-    <video autoplay></video>
-    <div class="absolute top-0 inset-x-0 flex justify-center">
-      <button class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 text-3xl hover:bg-yellow-400">Take Photo</button>
+  <div class="flex justify-center h-screen bg-gradient-to-r from-pink-500 to-yellow-500">
+    <div class="flex flex-col justify-center items-center">
+      <img src="/src/assets/ncl.png" class="w-48">
+      <h1 class="text-5xl font-black m-2">NUSHFood</h1>
+      <p class="text-xl mx-12 text-center">The automatic price detector for NUSH food stalls.</p>
+    </div>
+  </div>
+  <div class="flex justify-center flex-col p-8 h-screen">
+    <p class="text-center text-xl">Choose whether you're using this on a food or drink...</p>
+    <div class="flex justify-center flex-row gap-4 p-8">
+      <RouterLink class="h-fit bg-purple-200 p-12 rounded-xl" to="/drink">
+        <img src="https://openmoji.org/data/color/svg/1F379.svg">
+        <p class="text-xl m-2">Drink</p>
+      </RouterLink>
+      <RouterLink class="h-fit bg-yellow-200 p-12 rounded-xl" to="/food">
+        <img src="https://openmoji.org/data/color/svg/1F35B.svg">
+        <p class="text-xl m-2">Food</p>
+      </RouterLink>
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'app',
-  components: {},
-  data: function () {
-    return {
-      stream: null
-    }
-  },
-  methods: {
-    init: async function () {
-      if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-        console.log('gaming')
-        let constraints = {
-          video: {
-            width: { min: 1280 },
-            height: { min: 720 }
-          },
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-        const video = document.querySelector('video');
-        video.srcObject = stream
-        video.play()
-      }
-    },
-    getDevices: async function () {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-    }
-  },
-  beforeMount: function () {
-    this.init();
-  }
-}
-</script>
-
-<style>
-video {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.2);
-}
-</style>
