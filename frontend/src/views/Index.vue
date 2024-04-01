@@ -1,6 +1,9 @@
 <template>
-  <div id="app">
+  <div id="app" class="relative">
     <video autoplay></video>
+    <div class="absolute top-0 inset-x-0 flex justify-center">
+      <button class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 text-3xl hover:bg-yellow-400">Take Photo</button>
+    </div>
   </div>
 </template>
 
