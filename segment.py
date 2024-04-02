@@ -5,6 +5,8 @@ from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
 from PIL import Image
 
+from pypaynow import generate_food_paynow
+
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
 cfg.DATALOADER.NUM_WORKERS = 2
@@ -18,7 +20,25 @@ cfg.MODEL.DEVICE='cpu'
 cfg.MODEL.WEIGHTS = os.path.join("Weights", "model_final.pth")  # path to the model we just trained
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7   # set a custom testing threshold
 
-mapping = {1: 'Scrambled Egg', 2: 'Rice', 3: 'Chicken Nugget', 4: 'Green Vegetable', 5: 'White Vegetable', 6: 'Curry Vegetable', 7: 'Hashbrown', 8: 'Pork Belly', 9: 'Pork Bulogi/Honey Pork', 10: 'Popcorn Chicken', 11: 'Fishcake', 12: 'Potato', 13: 'Veg Spring Roll', 14: 'Soy Sauce Chicken', 15: 'Marinated Egg', 16: 'Basil Minced Pork', 17: 'Fish Fillet'}
+mapping = {
+    1: {'name': 'Scrambled Egg', 'type': 'Veg'}, 
+    2: {'name': 'Rice', 'type': 'Base'}, 
+    3: {'name': 'Chicken Nugget', 'type': 'Meat'}, 
+    4: {'name': 'Green Vegetable', 'type': 'Veg'}, 
+    5: {'name': 'White Vegetable', 'type': 'Veg'}, 
+    6: {'name': 'Curry Vegetable', 'type': 'Veg'}, 
+    7: {'name': 'Hashbrown', 'type': 'Veg'}, 
+    8: {'name': 'Pork Belly', 'type': 'Meat'}, 
+    9: {'name': 'Pork Bulogi/Honey Pork', 'type': 'Meat'}, 
+    10: {'name': 'Popcorn Chicken', 'type': 'Meat'}, 
+    11: {'name': 'Fishcake', 'type': 'Meat'}, 
+    12: {'name': 'Potato', 'type': 'Veg'}, 
+    13: {'name': 'Veg Spring Roll', 'type': 'Veg++'}, 
+    14: {'name': 'Soy Sauce Chicken', 'type': 'Meat'}, 
+    15: {'name': 'Marinated Egg', 'type': 'Veg'}, 
+    16: {'name': 'Basil Minced Pork', 'type': 'Meat'}, 
+    17: {'name': 'Fish Fillet', 'type': 'Meat'}}
+
 predictor = DefaultPredictor(cfg)
 
 def segmenter_list_foods(np_img_rgb):
@@ -26,7 +46,20 @@ def segmenter_list_foods(np_img_rgb):
     preds_id_list = predictor(np_img)["instances"].pred_classes.tolist()
     items_detected = []
     for predicted_id in preds_id_list:
-        item_name = mapping[predicted_id+1]
+        item_name = mapping[predicted_id+1]["name"]
         if item_name not in items_detected: items_detected.append(item_name)
 
-    return items_detected
+    result = []
+    price = 1.50 # Base price of rise
+    if len(items_detected) > 0:
+        for item in items_detected:
+            for key in mapping:
+                if mapping[key]["name"] == item:
+                    result.append([mapping[key]["name"], "("+mapping[key]["type"]+")"])
+                    if mapping[key]["type"] == "Veg": price += 0.5
+                    elif mapping[key]["type"] == "": pass
+                    else: price += 1.0
+
+    paynow_str, bill_ref = generate_food_paynow(price)
+
+    return {"result":result, "price":price, "paynow":paynow_str, "bill":bill_ref}

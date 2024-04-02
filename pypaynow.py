@@ -65,29 +65,7 @@ def generatePayNowQR(point_of_initiation,
        crc_value = ('{:04X}'.format(crc_value)) #convert into 4 digit uppercase hex
        payload += crc_value # add the CRC checksum result
 
-       # Creating an instance of qrcode
-       qr = qrcode.QRCode(
-              version = 1, # the size of QR code matrix.
-              box_size = 5, # how many pixels is each box of the QR code
-              border = 4, # how thick is the border
-              error_correction = qrcode.constants.ERROR_CORRECT_H,) # able to damage/cover the QR Code up to a certain percentage. H - 30% 
-       qr.add_data(payload)
-       qr.make(fit=True) #QR code to fit the entire dimension even when the input data could fit into fewer boxes
-       img = qr.make_image(fill_color=(144,19,123), back_color='white') #PayNow purple colour
-       
-       # Adding PayNow logo to the center
-       logo = Image.open('./paynow_logo.png')
-       # adjust logo image size 
-       basewidth = 85 # adjust this value for logo size
-       wpercent = (basewidth/float(logo.size[0]))
-       hsize = int((float(logo.size[1])*float(wpercent)))
-       logo = logo.resize((basewidth, hsize), Image.Resampling.LANCZOS)
-       # set position of logo and paste it 
-       pos = ((img.size[0] - logo.size[0]) // 2,
-              (img.size[1] - logo.size[1]) // 2)
-       img.paste(logo, pos)
-       
-       img.save('generated_qr.png')
+       return payload
        
 def crc16_ccitt(data): 
     crc = 0xFFFF # initial value
@@ -100,9 +78,9 @@ def crc16_ccitt(data):
         lsb = (x ^ (x << 5)) & 255
     return (msb << 8) + lsb
 
-def generate_food_qr(amount):
+def generate_food_paynow(amount):
     bill_ref = str(uuid.uuid4())[:8]
-    generatePayNowQR(point_of_initiation,
+    paynow_str = generatePayNowQR(point_of_initiation,
                 proxy_type,
                 proxy_value,
                 editable,
@@ -110,4 +88,4 @@ def generate_food_qr(amount):
                 expiry,
                 bill_ref
                 )
-    return bill_ref
+    return paynow_str, bill_ref
