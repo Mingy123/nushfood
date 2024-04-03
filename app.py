@@ -1,7 +1,8 @@
 from flask import Flask, request
 import numpy as np
 import os
-import random, string
+import random, string, base64
+from io import BytesIO
 from segment import segmenter_list_foods
 from PIL import Image
 import tensorflow as tf
@@ -18,20 +19,24 @@ drink_model = tf.keras.models.load_model('drink_model.h5')
 
 @app.route('/ai_orz', methods=['POST'])
 def ai_orz():
-    print("======= INFO =======", request.files)
-    file = request.files['file']
-    img = Image.open(file)
+    print("======= INFO =======", request.form['b64img'][:200])
+    image_data = base64.b64decode(request.form['b64img'])
+    img = Image.open(BytesIO(image_data))
+    # file = request.files['file']
+    # img = Image.open(file)
     np_img = np.array(img)
     print(np_img.shape)
     return class_names[np.argmax(drink_model.predict(np.expand_dims(np_img, axis=0)))]
 
 @app.route("/segment", methods=['POST'])
 def segment():
-    print("======= INFO =======", request.files)
-    file = request.files['file']
-    img = Image.open(file)
+    print("======= INFO =======", request.form['b64img'][:200])
+    image_data = base64.b64decode(request.form['b64img'])
+    img = Image.open(BytesIO(image_data))
+    # file = request.files['file']
+    # img = Image.open(file)
     np_img = np.array(img)
     return segmenter_list_foods(np_img)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=8000)

@@ -2,14 +2,13 @@
   <div id="app" class="relative">
     <video autoplay></video>
     <div class="absolute top-0 inset-x-0 flex justify-center">
-      <RouterLink to="/food/result"> 
-      <button class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 text-3xl hover:bg-yellow-400">Take Photo</button>
-      </RouterLink>
+      <button @click="takePhoto" class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 text-3xl hover:bg-yellow-400">Take Photo</button>
     </div>
   </div>
 </template>
 
 <script>
+import { api_segment } from '../api.js'
 export default {
   name: 'app',
   components: {},
@@ -38,6 +37,22 @@ export default {
     },
     getDevices: async function () {
       const devices = await navigator.mediaDevices.enumerateDevices();
+    },
+    takePhoto: async function () {
+      const video = document.querySelector('video');
+      var canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      var dataURL = canvas.toDataURL('image/jpeg');
+      // add a spinning circle thing to show it is loading
+      let answer = await api_segment(dataURL)
+      // send the user to the food result page here
+      // (you may want to look into vue props)
+      console.log(answer)
     }
   },
   beforeMount: function () {
