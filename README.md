@@ -5,6 +5,7 @@ Install torch first by `pip3 install torch torchvision torchaudio --index-url ht
 Then run `pip install -r requirements.txt`
 
 Start nginx:  
+`sudo cp server* /etc/nginx/`
 `sudo cp nginx.conf /etc/nginx/`  
 `sudo systemctl start nginx`  
 or equivalent for your system

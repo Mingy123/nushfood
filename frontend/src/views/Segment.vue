@@ -33,7 +33,8 @@ export default {
         let constraints = {
           video: {
             width: { min: 1280 },
-            height: { min: 720 }
+            height: { min: 720 },
+            facingMode: 'environment'
           },
         };
 
@@ -62,8 +63,6 @@ export default {
       var dataURL = canvas.toDataURL('image/jpeg');
       // add a spinning circle thing to show it is loading
       let answer = await api_segment(dataURL)
-      // send the user to the food result page here
-      // (you may want to look into vue props)
       console.log(answer)
       router.push({
         name: 'Food Result',
@@ -81,9 +80,8 @@ export default {
         if (this.files && this.files[0]) {
           var reader = new FileReader();
           reader.onload = async function () {
+            // add a spinning circle thing to show it is loading
             let answer = await api_segment(reader.result)
-            // send the user to the food result page here
-            // (you may want to look into vue props)
             console.log(answer)
             router.push({
               name: 'Food Result',
@@ -93,7 +91,6 @@ export default {
             })
           }
           reader.readAsDataURL(this.files[0]);
-          // add a spinning circle thing to show it is loading
         }
       });
     });
