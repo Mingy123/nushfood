@@ -6,8 +6,11 @@
         class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 text-3xl hover:bg-yellow-400">Take Photo</button>
       <input id="img_upload" type='file' accept=".jpg,.jpeg" class="hidden" />
       <label for="img_upload"
-        class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 ml-8 text-3xl hover:bg-yellow-400">Upload
+        class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 ml-8 text-3xl hover:bg-yellow-400 text-center">Upload
         Image</label>
+    </div>
+    <div v-if="img_processing" class="absolute inset-0 bg-white opacity-60 flex justify-center items-center">
+      <img src="/src/assets/loading.gif" class="w-48 ">
     </div>
   </div>
 </template>
@@ -15,12 +18,14 @@
 <script>
 import { api_segment } from '../api.js'
 
+
 export default {
   name: 'app',
   components: {},
   data: function () {
     return {
-      stream: null
+      stream: null,
+      img_processing: false
     }
   },
   methods: {
@@ -61,6 +66,7 @@ export default {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       var dataURL = canvas.toDataURL('image/jpeg');
+      this.img_processing = true
       // add a spinning circle thing to show it is loading
       let answer = await api_segment(dataURL)
       console.log(answer)
@@ -75,11 +81,13 @@ export default {
   beforeMount: function () {
     this.init();
     const router = this.$router
+    let _this = this;
     window.addEventListener('load', function () {
       document.querySelector('input[type="file"]').addEventListener('change', async function () {
         if (this.files && this.files[0]) {
           var reader = new FileReader();
           reader.onload = async function () {
+            _this.img_processing = true
             // add a spinning circle thing to show it is loading
             let answer = await api_segment(reader.result)
             console.log(answer)

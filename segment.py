@@ -3,6 +3,7 @@ import numpy as np
 from detectron2.config import get_cfg
 from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
+from detectron2.utils.visualizer import Visualizer, ColorMode
 from PIL import Image
 
 from pypaynow import generate_food_paynow
@@ -43,22 +44,43 @@ predictor = DefaultPredictor(cfg)
 
 def segmenter_list_foods(np_img_rgb):
     np_img = np_img_rgb[:, :, ::-1]
-    preds_id_list = predictor(np_img)["instances"].pred_classes.tolist()
+    preds = predictor(np_img)
+    v = Visualizer(np_img_rgb,
+        scale=0.5,
+        instance_mode=ColorMode.IMAGE_BW   # remove the colors of unsegmented pixels. This option is only available for segmentation models
+    )
+    out = v.draw_instance_predictions(preds["instances"].to("cpu"))
+    out_img = Image.fromarray(out.get_image())
+    out_img.save("output.jpg")
+
+    preds_id_list = preds["instances"].pred_classes.tolist()
     items_detected = []
-    for predicted_id in preds_id_list:
+    highest_accuracy = {}
+    total_sizes = {}
+    print(preds["instances"].scores)
+    for i, predicted_id in enumerate(preds_id_list):
         item_name = mapping[predicted_id+1]["name"]
-        if item_name not in items_detected: items_detected.append(item_name)
+        if item_name not in items_detected:
+            items_detected.append(item_name)
+            total_sizes[item_name] = 0
+            highest_accuracy[item_name] = 0
+        total_sizes[item_name] += preds["instances"].pred_boxes[i].area().numpy()[0]
+        highest_accuracy[item_name] = max(highest_accuracy[item_name], preds["instances"].scores.tolist()[i])
+
+    print(total_sizes)
+    print(highest_accuracy)
 
     result = []
     price = 1.50 # Base price of rise
     if len(items_detected) > 0:
         for item in items_detected:
-            for key in mapping:
-                if mapping[key]["name"] == item:
-                    result.append([mapping[key]["name"], "("+mapping[key]["type"]+")"])
-                    if mapping[key]["type"] == "Veg": price += 0.5
-                    elif mapping[key]["type"] == "Base": pass
-                    else: price += 1.0
+            if highest_accuracy[item] > 0.95 or total_sizes[item] > preds["instances"].image_size[0]*preds["instances"].image_size[1]*0.05:
+                for key in mapping:
+                    if mapping[key]["name"] == item:
+                        result.append([mapping[key]["name"], "("+mapping[key]["type"]+")"])
+                        if mapping[key]["type"] == "Veg": price += 0.5
+                        elif mapping[key]["type"] == "Base": pass
+                        else: price += 1.0
 
     paynow_str, bill_ref = generate_food_paynow(price)
 
