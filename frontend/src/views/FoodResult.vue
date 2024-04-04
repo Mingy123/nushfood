@@ -2,9 +2,15 @@
 import { ref } from 'vue'
 import QrcodeVue from 'qrcode.vue'
 
-const items = ref([["Rice", ""], ["Scrambled Egg", "(Veg)"], ["Pork Belly", "(Meat)"]])
-const price = 2.50
-const payNowString = "00020101021226560009SG.PAYNOW010100211+65883430740301104142024040423000052040000530370254042.505802SG59006009Singapore621201082215b85963048DE2"
+const props = defineProps(['rawData'])
+const data = JSON.parse(props.rawData)
+
+console.log()
+
+const items = ref(data["result"])
+const price = data["price"]
+const payNowString = data["paynow"]
+const billRef = data["bill"]
 
 </script>
 
@@ -22,11 +28,12 @@ const payNowString = "00020101021226560009SG.PAYNOW010100211+6588343074030110414
         <div class="flex flex-row justify-center align-center p-8">
             <qrcode-vue :value=payNowString size=300 level="M" />
         </div>
-        <p>{{ payNowString }}</p>
+        <p class="text-center">Bill Reference: {{ billRef }}</p>
     </div>
     <div class="absolute bottom-4 inset-x-0 flex justify-center">
-        <RouterLink to="/food">    
-            <button class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 text-3xl hover:bg-yellow-400">Back</button>
-        </RouterLink> 
+        <RouterLink to="/food">
+            <button
+                class="bg-yellow-200 rounded-full p-4 pl-6 pr-6 font-bold mt-2 text-3xl hover:bg-yellow-400">Back</button>
+        </RouterLink>
     </div>
 </template>

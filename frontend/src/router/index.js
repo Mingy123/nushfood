@@ -19,7 +19,8 @@ const router = createRouter({
     {
       path: '/food/result',
       name: 'Food Result',
-      component: FoodResult
+      component: FoodResult,
+      props: (route) => ({ rawData: route.query.rawData }), 
     }
   ]
 })

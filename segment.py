@@ -57,7 +57,7 @@ def segmenter_list_foods(np_img_rgb):
                 if mapping[key]["name"] == item:
                     result.append([mapping[key]["name"], "("+mapping[key]["type"]+")"])
                     if mapping[key]["type"] == "Veg": price += 0.5
-                    elif mapping[key]["type"] == "": pass
+                    elif mapping[key]["type"] == "Base": pass
                     else: price += 1.0
 
     paynow_str, bill_ref = generate_food_paynow(price)
