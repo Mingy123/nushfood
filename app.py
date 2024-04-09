@@ -15,7 +15,7 @@ def random_filename(n):
 
 
 app = Flask('__name__')
-drink_model = tf.keras.models.load_model('drink_model.h5')
+drink_model = tf.keras.models.load_model('drink_model.keras')
 
 @app.route('/ai_orz', methods=['POST'])
 def ai_orz():
